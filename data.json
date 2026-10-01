@@ -1,0 +1,47 @@
+{
+  "title": "Walktober",
+  "challenge": {
+    "start": "2026-10-01",
+    "end": "2026-10-31"
+  },
+  "updated": "2026-09-30T22:10:00-04:00",
+  "people": [
+    {
+      "id": "ross",
+      "name": "Ross",
+      "baseline": 383411,
+      "photo": "faces/ross.png",
+      "color": "#e8590c",
+      "garminUserId": 109307650,
+      "character": "mummy"
+    },
+    {
+      "id": "aj",
+      "name": "AJ",
+      "baseline": 510485,
+      "photo": "faces/aj.png",
+      "color": "#9c5fe0",
+      "garminUserId": 98800478,
+      "character": "witch"
+    },
+    {
+      "id": "adam",
+      "name": "Adam",
+      "baseline": 378879,
+      "photo": "faces/adam.png",
+      "color": "#7fa33a",
+      "garminUserId": 112856944,
+      "character": "cat"
+    },
+    {
+      "id": "kev",
+      "name": "Kev",
+      "baseline": 510343,
+      "photo": "faces/kev.png",
+      "color": "#3fd0c9",
+      "garminUserId": 72941412,
+      "character": "skeleton"
+    }
+  ],
+  "history": []
+}

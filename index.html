@@ -1,0 +1,690 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Walktober</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Creepster&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --night:#1a0d2b;
+  --plum:#3b1646;
+  --ember:#8a2f17;
+  --pumpkin:#ff7a1a;
+  --gold:#ffb84d;
+  --cream:#fff1dc;
+  --dim:#c9b3d6;
+  --w:100px;
+  --h:calc(var(--w) * 1.7);
+  --pad:50px;
+  --hat:42px;
+  --dt:calc(var(--feet) + 38px);
+  --rowH:calc(var(--h) + var(--hat) + 100px);
+  --ih:48px;
+  --pctCol:128px;
+  --lcol:104px;
+  --feet:calc(var(--hat) + var(--h) * .93);
+}
+*{box-sizing:border-box}
+html{background:var(--night)}
+body{
+  margin:0; min-height:100vh; color:var(--cream);
+  font-family:"Fredoka",system-ui,sans-serif;
+  background:
+    radial-gradient(120% 60% at 50% 108%, var(--ember) 0%, rgba(138,47,23,0) 62%),
+    linear-gradient(180deg, var(--night) 0%, var(--plum) 62%, #4a1d3a 100%);
+  background-attachment:fixed;
+  overflow-x:hidden;
+}
+.moon{
+  position:fixed; top:84px; right:6vw; z-index:0; width:92px; height:92px; border-radius:50%;
+  background:radial-gradient(circle at 36% 34%, #fff6cf 0 55%, #f3d98a 100%);
+  box-shadow:0 0 60px 14px rgba(255,214,120,.28);
+  opacity:.9; pointer-events:none;
+}
+.moon::after{content:""; position:absolute; left:52px; top:22px; width:16px; height:16px; border-radius:50%; background:rgba(190,150,60,.25); box-shadow:-22px 30px 0 -3px rgba(190,150,60,.2)}
+.leaf{position:fixed; top:-40px; font-size:22px; opacity:.55; pointer-events:none; animation:fall linear infinite; will-change:transform}
+@keyframes fall{
+  0%{transform:translate3d(0,-10vh,0) rotate(0deg)}
+  50%{transform:translate3d(40px,55vh,0) rotate(180deg)}
+  100%{transform:translate3d(-30px,112vh,0) rotate(360deg)}
+}
+.wrap{position:relative; max-width:1080px; margin:0 auto; padding:34px 16px 56px; overflow-x:clip}
+header{padding:6px 0 14px}
+h1{
+  font-family:"Creepster",cursive; font-weight:400; margin:0; text-align:center; white-space:nowrap;
+  font-size:min(22vw,150px); line-height:.95; letter-spacing:.02em;
+  color:var(--pumpkin); text-shadow:0 3px 0 #3a1200, 0 0 34px rgba(255,122,26,.45);
+}
+h1 span{display:inline-block}
+
+.board{position:relative; margin-top:6px}
+.stack{position:relative; height:calc(4 * var(--rowH))}
+
+.row{
+  position:absolute; left:0; right:0; height:var(--rowH); display:flex;
+  transform:translateY(calc(var(--rank) * var(--rowH)));
+  transition:transform 1s cubic-bezier(.5,.1,.2,1);
+}
+.lane{position:relative; flex:1; z-index:1}
+.bar{
+  position:absolute; left:calc(var(--pad) - 16px); right:calc(var(--pad) - 16px);
+  top:calc(var(--feet) - 3px); height:5px; z-index:1;
+}
+.fill{
+  height:100%; border-radius:99px; min-width:16px;
+  width:calc((100% - 32px) * var(--p) + 16px);
+  background:linear-gradient(90deg, rgba(255,122,26,0), var(--c));
+  box-shadow:0 0 12px var(--c); opacity:.9;
+  transition:width 1s cubic-bezier(.5,.1,.2,1);
+}
+.runner{
+  position:absolute; top:var(--hat); width:150px; text-align:center; z-index:2;
+  left:calc(var(--pad) + (100% - 2 * var(--pad)) * var(--p));
+  transform:translateX(-50%);
+  transition:left 1s cubic-bezier(.5,.1,.2,1);
+}
+.walker{display:block; width:var(--w); height:var(--h); margin:0 auto; overflow:visible}
+.who{
+  position:absolute; left:12px; top:var(--dt); height:var(--ih); z-index:2;
+  display:flex; flex-direction:column; justify-content:center; line-height:1.1; white-space:nowrap;
+}
+.pname{font-size:20px; font-weight:600; color:var(--cream)}
+.leader .pname::before{content:"👑 "}
+.steps{font-size:22px; font-weight:700; color:var(--c); font-variant-numeric:tabular-nums}
+.gap{
+  position:absolute; z-index:2; top:var(--dt); height:var(--ih); width:116px; transform:translateX(-50%);
+  display:flex; flex-direction:column; justify-content:center;
+  left:calc((var(--lcol) + 100% - var(--pctCol) - 12px) / 2);
+  text-align:center; font-size:clamp(15px,2.7vw,23px); font-weight:700; line-height:1.1; color:var(--c); opacity:.85;
+  font-variant-numeric:tabular-nums; transition:opacity .4s;
+}
+.gap i{white-space:nowrap; display:block; font-style:normal; font-size:.54em; font-weight:500; letter-spacing:0; opacity:.9; margin-top:.1em}
+.gap.none{opacity:0}
+.pct{
+  position:absolute; right:12px; top:var(--dt); height:var(--ih); z-index:2;
+  width:var(--pctCol); display:flex; align-items:center; justify-content:center;
+  font-size:clamp(30px,5.4vw,42px); font-weight:700; color:var(--c);
+  font-variant-numeric:tabular-nums; line-height:1; text-shadow:0 2px 0 rgba(0,0,0,.35); white-space:nowrap;
+}
+.pct em{font-style:normal; font-size:.55em; font-weight:500; margin-left:2px}
+
+/* last year's graveyard */
+.yard{margin-top:34px; position:relative}
+.yard-stones{position:relative; display:flex; justify-content:space-around; align-items:flex-end; gap:8px; padding:0 6px; z-index:1}
+.yard-stones::before{content:""; position:absolute; left:0; right:0; bottom:8px; height:50px; opacity:.35; background:var(--fence) repeat-x left bottom/26px 50px; z-index:-1}
+.rip{
+  width:min(22%,150px); text-align:center; padding:26px 4px 14px;
+  border-radius:50% 50% 6px 6px / 44px 44px 6px 6px;
+  background:linear-gradient(180deg,#76698f 0%,#554a6b 100%);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.18), inset 0 -10px 18px rgba(0,0,0,.22), 0 3px 0 rgba(0,0,0,.35);
+  color:#241b33; text-shadow:0 1px 0 rgba(255,255,255,.28); transform:rotate(var(--t,0deg));
+}
+.rip b{display:block; font-size:clamp(15px,3.6vw,22px); font-weight:700; line-height:1.15}
+.rip span{display:block; margin-top:3px; font-size:clamp(13px,3.2vw,20px); font-weight:600; font-variant-numeric:tabular-nums}
+.yard-ground{
+  position:relative; margin-top:-10px; padding:22px 12px 18px; text-align:center; border-radius:0 0 18px 18px;
+  background:linear-gradient(180deg,#2d2336 0,#1c1325 45%,#130b1b 100%);
+  font-family:"Creepster",cursive; font-size:clamp(26px,6vw,38px); letter-spacing:.06em; color:var(--gold);
+  text-shadow:0 2px 0 #3a1200;
+}
+.yard-ground::before{content:""; position:absolute; left:0; right:0; top:-9px; height:10px; background:var(--grass) repeat-x left bottom/22px 10px}
+
+/* graveyard */
+.scene{position:absolute; inset:0; pointer-events:none; z-index:0}
+.ground{
+  position:absolute; left:0; right:0; top:var(--feet); bottom:8px; border-radius:0 0 18px 18px;
+  background:linear-gradient(180deg,#2d2336 0,#1c1325 38%,#130b1b 100%);
+  box-shadow:0 10px 24px rgba(0,0,0,.25);
+}
+.ground::before{
+  content:""; position:absolute; left:0; right:0; top:-9px; height:10px;
+  background:var(--grass) repeat-x left bottom/22px 10px;
+}
+.decor{position:absolute; left:0; right:0; top:var(--hat); height:calc(var(--h) * .93)}
+.decor>*{position:absolute; bottom:-4px}
+.fence{left:0; right:0; height:50px; opacity:.4; background:var(--fence) repeat-x left bottom/26px 50px}
+.stone{opacity:.8; filter:drop-shadow(0 2px 0 rgba(0,0,0,.35))}
+.tree{opacity:.9}
+.marks{position:absolute; left:0; right:0; top:0; bottom:0; pointer-events:none; z-index:0}
+.mark{
+  position:absolute; top:calc(var(--feet) + 6px); width:30px; height:26px; margin-left:-15px;
+  filter:drop-shadow(0 2px 0 rgba(0,0,0,.4)); transition:left .6s ease;
+}
+.mark.pk{filter:drop-shadow(0 0 5px rgba(255,140,30,.65))}
+.mark.hundred{width:38px; height:32px; margin-left:-19px; top:calc(var(--feet) + 5px); }
+.fog{
+  position:absolute; left:0; right:0; top:calc(var(--feet) - 26px); height:46px; z-index:3; pointer-events:none;
+  background:radial-gradient(60% 100% at 30% 60%, rgba(214,200,232,.2), transparent 70%), radial-gradient(50% 100% at 78% 55%, rgba(214,200,232,.16), transparent 70%);
+  animation:drift 22s ease-in-out infinite alternate;
+}
+@keyframes drift{from{transform:translateX(-4%)}to{transform:translateX(4%)}}
+.bats{position:absolute; left:0; right:0; top:0; height:0; pointer-events:none}
+.bat{position:absolute; font-size:20px; opacity:.7; animation:fly linear infinite}
+@keyframes fly{
+  0%{transform:translate(-8vw,0) scale(.8)} 25%{transform:translate(25vw,-10px) scale(1)}
+  50%{transform:translate(55vw,6px) scale(.9)} 100%{transform:translate(112vw,-6px) scale(1)}
+}
+
+/* walking cycle */
+.walker .body{animation:bob .9s ease-in-out infinite; animation-delay:var(--d)}
+.walker .limb{transform-box:view-box; animation-duration:1.8s; animation-iteration-count:infinite; animation-timing-function:ease-in-out; animation-delay:var(--d)}
+.walker .leg{transform-origin:50px 100px}
+.walker .arm{transform-origin:50px 66px}
+.walker .fwd{animation-name:swingA}
+.walker .back{animation-name:swingB}
+@keyframes swingA{0%,100%{transform:rotate(26deg)}50%{transform:rotate(-26deg)}}
+@keyframes swingB{0%,100%{transform:rotate(-26deg)}50%{transform:rotate(26deg)}}
+.walker .cape{transform-box:view-box; transform-origin:46px 58px; animation:flap 1.8s ease-in-out infinite; animation-delay:var(--d)}
+.walker .tail{transform-box:view-box; transform-origin:46px 96px; animation:wag .9s ease-in-out infinite alternate; animation-delay:var(--d)}
+@keyframes flap{0%,100%{transform:skewX(0deg)}50%{transform:skewX(-7deg)}}
+@keyframes wag{from{transform:rotate(-7deg)}to{transform:rotate(9deg)}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3.5px)}}
+
+.controls{
+  margin-top:26px; display:flex; flex-wrap:wrap; align-items:center; gap:14px 18px;
+  padding:14px 16px; border-radius:16px; background:rgba(0,0,0,.28); border:1px solid rgba(255,241,220,.1);
+}
+button{
+  font:inherit; font-weight:600; font-size:16px; color:#2a0f00; cursor:pointer;
+  padding:10px 18px; border:0; border-radius:99px;
+  background:linear-gradient(180deg,var(--gold),var(--pumpkin));
+  box-shadow:0 3px 0 #a14300;
+}
+button:active{transform:translateY(2px); box-shadow:0 1px 0 #a14300}
+button.ghost{background:transparent; color:var(--cream); box-shadow:inset 0 0 0 1.5px rgba(255,241,220,.35)}
+button:disabled{opacity:.4; cursor:default}
+button:focus-visible,input:focus-visible{outline:3px solid var(--gold); outline-offset:3px}
+.scrub{flex:1; min-width:180px; display:flex; align-items:center; gap:12px}
+input[type=range]{flex:1; accent-color:var(--pumpkin); height:28px}
+.when{min-width:128px; font-weight:500; color:var(--gold); font-size:17px}
+.note{margin:18px 2px 0; color:var(--dim); font-size:14px; line-height:1.5}
+.note b{color:var(--cream); font-weight:500}
+.banner{display:none; margin:0 0 14px; padding:8px 14px; border-radius:10px; background:rgba(255,184,77,.16); color:var(--gold); font-size:14px}
+.err{padding:18px; border-radius:12px; background:rgba(0,0,0,.35); color:var(--cream); line-height:1.5}
+
+@media (max-width:640px){
+  :root{--w:62px; --pad:31px; --pctCol:84px; --hat:30px; --lcol:80px; --rowH:calc(var(--h) + var(--hat) + 92px); --ih:42px}
+  .runner{width:116px}
+  .who{left:10px}
+  .pname{font-size:16px}
+  .steps{font-size:18px}
+  .pct{right:8px; font-size:30px}
+  .moon{width:60px;height:60px;top:16px}
+  .moon::after{display:none}
+  .when{min-width:100px}
+  .mark{width:23px!important;height:19px!important;margin-left:-11.5px!important;top:calc(var(--feet) + 5px)!important}
+  .mark.hundred{width:27px!important;height:23px!important;margin-left:-13.5px!important}
+}
+@media (prefers-reduced-motion:reduce){
+  .leaf{display:none}
+  .walker .body,.walker .limb,.walker .cape,.walker .tail{animation:none}
+  .row,.runner,.fill,.mark{transition-duration:.01s}
+  .fog,.bat{animation:none}
+  .bat{display:none}
+}
+</style>
+</head>
+<body>
+<div class="moon" aria-hidden="true"></div>
+<div id="leaves" aria-hidden="true"></div>
+<div class="bats" id="bats" aria-hidden="true"></div>
+
+<div class="wrap">
+  <header>
+    <h1 id="ttl"><span id="ttlText">Walktober</span></h1>
+  </header>
+
+  <div class="banner" id="demoBanner">Demo data. This is a preview, not real steps.</div>
+
+  <section class="board" aria-label="Walktober standings">
+    <div class="stack" id="stack"></div>
+  </section>
+
+  <section class="controls" aria-label="Replay controls">
+    <button id="play" type="button">Replay the month</button>
+    <div class="scrub">
+      <input id="slider" type="range" min="0" max="0" value="0" aria-label="Day of the month">
+      <span class="when" id="when" aria-live="polite"></span>
+    </div>
+    <button id="live" class="ghost" type="button">Latest</button>
+  </section>
+
+  <section class="yard" id="yard" aria-label="Last October's totals"><div class="yard-stones" id="yardStones"></div><div class="yard-ground">Walktober 2025</div></section>
+
+  <p class="note" id="note"></p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var qs = new URLSearchParams(location.search);
+  var DEMO = qs.has("demo");
+  var DAY_MS = 1250;
+
+  var stack = document.getElementById("stack");
+  var slider = document.getElementById("slider");
+  var whenEl = document.getElementById("when");
+  var playBtn = document.getElementById("play");
+  var liveBtn = document.getElementById("live");
+  var noteEl = document.getElementById("note");
+
+  var data, people, frames = [], idx = 0, timer = null, axisMax = 0, rows = {};
+
+  /* ---------- falling leaves ---------- */
+  (function(){
+    var holder = document.getElementById("leaves");
+    var glyphs = ["🍂","🍁","🍂","🍃"];
+    for (var i=0;i<9;i++){
+      var s = document.createElement("span");
+      s.className = "leaf"; s.textContent = glyphs[i % glyphs.length];
+      s.style.left = (4 + i*11) + "vw";
+      s.style.animationDuration = (16 + (i*5)%11) + "s";
+      s.style.animationDelay = (-i*3.1) + "s";
+      holder.appendChild(s);
+    }
+  })();
+
+  /* ---------- helpers ---------- */
+  function fmt(n){ return Math.round(n).toLocaleString("en-US"); }
+  function fmtDate(iso){
+    var d = new Date(iso + "T12:00:00");
+    return d.toLocaleDateString("en-US",{month:"short", day:"numeric"});
+  }
+  function pctOf(p, steps){ return steps / p.baseline * 100; }
+
+  function tween(el, to, render){
+    var from = el._v == null ? 0 : el._v;
+    if (el._raf) cancelAnimationFrame(el._raf);
+    var t0 = performance.now(), dur = 900;
+    function tick(now){
+      var k = Math.min(1, (now - t0) / dur);
+      var e = 1 - Math.pow(1 - k, 3);
+      el._v = from + (to - from) * e;
+      el.firstChild ? (el.firstChild.nodeValue = render(el._v)) : (el.textContent = render(el._v));
+      if (k < 1) el._raf = requestAnimationFrame(tick); else el._raf = 0;
+    }
+    el._raf = requestAnimationFrame(tick);
+  }
+
+  /* ---------- walker svg: four spooky bodies under the real heads ---------- */
+  var OL = "rgba(255,241,220,.62)";
+  function seg(x1, y1, x2, y2, w, col, ol){
+    ol = ol || OL;
+    return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + ol + '" stroke-width="' + (w + 2.4) + '" stroke-linecap="round"/>' +
+           '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + col + '" stroke-width="' + w + '" stroke-linecap="round"/>';
+  }
+  function circ(cx, cy, r, fill, ol){ return '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + fill + '" stroke="' + (ol || OL) + '" stroke-width="1"/>'; }
+  function ell(cx, cy, rx, ry, fill, ol){ return '<ellipse cx="' + cx + '" cy="' + cy + '" rx="' + rx + '" ry="' + ry + '" fill="' + fill + '" stroke="' + (ol || OL) + '" stroke-width="1"/>'; }
+  function rect(x, y, w, h, rx, fill, ol){ return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="' + rx + '" fill="' + fill + '" stroke="' + (ol || OL) + '" stroke-width="1"/>'; }
+  function shape(d, fill, ol, sw){ return '<path d="' + d + '" fill="' + fill + '" stroke="' + (ol || OL) + '" stroke-width="' + (sw || 1) + '" stroke-linejoin="round"/>'; }
+  function limb(cls, back, inner){ return '<g class="limb ' + cls + ' ' + (back ? 'back' : 'fwd') + '"' + (back ? ' opacity=".8"' : '') + '>' + inner + '</g>'; }
+
+  function line(d, col, w, extra){ return '<path d="' + d + '" fill="none" stroke="' + col + '" stroke-width="' + w + '" stroke-linecap="round" stroke-linejoin="round" ' + (extra || '') + '/>'; }
+  function bands(x, y1, y2, hw, col){
+    var s = "";
+    for (var y = y1; y < y2; y += 4.6) s += '<path d="M' + (x - hw) + ' ' + y + ' L' + (x + hw) + ' ' + (y + 1.4) + '" stroke="' + col + '" stroke-width=".9" fill="none"/>';
+    return s;
+  }
+  var none = function(){ return ""; };
+  var BONE = "#efe9d6", BONE_SHADE = "#a79f86";
+  var WRAP = "#e6d9b8", WRAP_LN = "#a8966c", SKIN = "#f1c9a5", CAT = "#1d1826";
+  var CHARACTERS = {
+    skeleton: {
+      label: "skeleton",
+      arm: function(){
+        return seg(50, 66, 50, 97, 4.4, BONE, BONE_SHADE) + circ(50, 66, 3.7, BONE, BONE_SHADE) +
+               circ(50, 81, 3.3, BONE, BONE_SHADE) + circ(50, 99, 3.8, BONE, BONE_SHADE);
+      },
+      leg: function(){
+        return seg(50, 100, 50, 148, 5, BONE, BONE_SHADE) + circ(50, 124, 3.7, BONE, BONE_SHADE) +
+               circ(50, 148, 3.4, BONE, BONE_SHADE) + ell(56, 153.5, 9.5, 3.8, BONE, BONE_SHADE);
+      },
+      behind: none, behindHead: none, mid: none, front: none,
+      torso: function(){
+        return '<path d="M37 62 C37 59 63 59 63 62 C66 77 60 89 50 91 C40 89 34 77 37 62 Z" fill="rgba(22,12,38,.78)" stroke="' + BONE + '" stroke-width="2.4" stroke-linejoin="round"/>' +
+               '<path d="M38.5 67 Q50 72 61.5 67 M37.8 74 Q50 79 62.2 74 M39.5 81 Q50 86 60.5 81" fill="none" stroke="' + BONE + '" stroke-width="2" stroke-linecap="round"/>' +
+               seg(50, 53, 50, 100, 3.4, BONE, BONE_SHADE) +
+               shape("M38 98 Q50 92 62 98 Q60 109 50 109 Q40 109 38 98 Z", BONE, BONE_SHADE);
+      }
+    },
+    mummy: {
+      label: "mummy",
+      arm: function(){
+        return seg(50, 66, 50, 95, 10, WRAP) + bands(50, 68, 94, 5, WRAP_LN) + circ(50, 99, 5.4, WRAP) +
+               line("M50 99 C40 104 34 96 24 104 C16 110 12 100 4 106", WRAP, 3.4);
+      },
+      leg: function(){
+        return seg(50, 100, 50, 146, 11.5, WRAP) + bands(50, 102, 144, 5.6, WRAP_LN) +
+               ell(57, 152, 11.5, 5.4, WRAP) + bands(54, 148, 156, 4, WRAP_LN);
+      },
+      behind: none, behindHead: none, mid: none,
+      torso: function(){
+        var d = "";
+        for (var i = 0; i < 6; i++){
+          d += '<path d="M35 ' + (58 + i * 8) + ' L65 ' + (66 + i * 8) + '" stroke="' + WRAP_LN + '" stroke-width=".9"/>' +
+               '<path d="M65 ' + (58 + i * 8) + ' L35 ' + (66 + i * 8) + '" stroke="' + WRAP_LN + '" stroke-width=".9" opacity=".6"/>';
+        }
+        return rect(35, 54, 30, 50, 6, WRAP) + d +
+               shape("M35 100 L38 108 L41 101 L44 107 L47 101 L50 108 L53 101 L56 107 L59 101 L62 108 L65 100 Z", WRAP);
+      },
+      front: function(){
+        return shape("M27 15 Q50 6 73 15 L74 23 Q50 14 26 23 Z", WRAP) +
+               line("M33 12 L34 21 M45 9 L46 18 M57 9 L58 18 M68 12 L69 21", WRAP_LN, .9) +
+               line("M74 20 C84 22 88 30 96 28", WRAP, 2.8);
+      }
+    },
+    witch: {
+      label: "witch",
+      arm: function(){ return seg(50, 66, 50, 92, 9.5, "#2b1b3d") + circ(50, 98, 4.8, SKIN); },
+      leg: function(){
+        return seg(50, 100, 50, 146, 9, "#7b3fb0") +
+               '<line x1="50" y1="100" x2="50" y2="146" stroke="#17101f" stroke-width="9" stroke-dasharray="4 4"/>' +
+               shape("M42 147 H64 Q75 146 82 139 Q80 153 66 153 H42 Z", "#17101f");
+      },
+      behind: none, behindHead: none, mid: none,
+      torso: function(){
+        return shape("M36 54 H64 L78 128 L72 122 L66 130 L58 123 L50 131 L42 123 L34 130 L28 122 L22 128 Z", "#2b1b3d") +
+               rect(36, 84, 28, 4, 1, "#7b3fb0") + rect(46, 82, 8, 8, 1, "#d4af37");
+      },
+      front: function(){
+        return ell(50, 6, 36, 7, "#2b1b3d") +
+               shape("M36 5 C40 -12 48 -24 52 -34 C55 -40 62 -42 66 -38 C60 -36 60 -28 62 -18 C64 -10 64 -2 64 5 Z", "#2b1b3d") +
+               shape("M36 2 L64 2 L64 -4 L37 -4 Z", "#7b3fb0") + rect(46, -5, 8, 8, 1, "none", "#d4af37");
+      }
+    },
+    cat: {
+      label: "black cat",
+      arm: function(){ return seg(50, 66, 50, 93, 9, CAT) + circ(50, 98, 5, CAT); },
+      leg: function(){ return seg(50, 100, 50, 146, 10.5, CAT) + ell(57, 152, 11, 5, CAT); },
+      behind: function(){
+        return '<g class="tail">' + line("M46 98 C24 102 14 84 24 66", "#f4efe6", 9.4, 'opacity=".6"') +
+               line("M46 98 C24 102 14 84 24 66", CAT, 7) + '</g>';
+      },
+      behindHead: none, mid: none,
+      torso: function(){ return rect(35, 54, 30, 50, 8, CAT) + rect(38, 56, 24, 4, 2, "#c1121f") + circ(50, 62, 2.6, "#d4af37"); },
+      front: function(){
+        return shape("M25 8 L28 -14 L44 3 Z", CAT) + shape("M28 4 L30 -7 L38 2 Z", "#e58aa0", "none") +
+               shape("M75 8 L72 -14 L56 3 Z", CAT) + shape("M72 4 L70 -7 L62 2 Z", "#e58aa0", "none") +
+               line("M30 40 L8 36 M30 44 L6 46 M31 48 L11 56 M70 40 L92 36 M70 44 L94 46 M69 48 L89 56", "#f4efe6", 1.2);
+      }
+    }
+  };
+
+  function walkerSVG(p, i){
+    var c = CHARACTERS[p.character] || CHARACTERS.skeleton;
+    var delay = (-(i * 0.37)).toFixed(2) + "s";
+    return '' +
+    '<svg class="walker" viewBox="0 0 100 170" style="--d:' + delay + '" role="img" aria-label="' + p.name + ' walking as a ' + c.label + '">' +
+      '<ellipse cx="54" cy="158" rx="28" ry="3.6" fill="rgba(0,0,0,.5)"/>' +
+      '<g class="body">' +
+        c.behind() +
+        limb("arm", true, c.arm()) + limb("leg", true, c.leg()) +
+        c.torso() +
+        limb("leg", false, c.leg()) +
+        c.mid() +
+        limb("arm", false, c.arm()) +
+        c.behindHead() +
+        '<image href="' + p.photo + '" x="19" y="-1" width="62" height="62" preserveAspectRatio="xMidYMax meet"/>' +
+        c.front() +
+      '</g>' +
+    '</svg>';
+  }
+
+  /* ---------- graveyard scenery ---------- */
+  function svgUrl(svg){ return 'url("data:image/svg+xml;utf8,' + encodeURIComponent(svg) + '")'; }
+  document.documentElement.style.setProperty("--grass", svgUrl(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="10"><path d="M0 10 L2 2 L4 10 L7 0 L9.5 10 L13 3 L15 10 L18 1 L20 10 Z" fill="#33283f"/></svg>'));
+  document.documentElement.style.setProperty("--fence", svgUrl(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="26" height="50"><g fill="#0e0716"><rect x="0" y="16" width="26" height="3"/><rect x="0" y="34" width="26" height="3"/><rect x="10" y="6" width="4" height="44"/><path d="M12 0 L16 8 L8 8 Z"/></g></svg>'));
+  var STONES = [
+    function(w,h){ return '<path d="M4 ' + (h-2) + ' V' + (w/2+4) + ' Q4 3 ' + (w/2) + ' 3 Q' + (w-4) + ' 3 ' + (w-4) + ' ' + (w/2+4) + ' V' + (h-2) + ' Z" fill="#5b5070"/><path d="M' + (w/2-6) + ' ' + (h*.38) + ' H' + (w/2+6) + ' M' + (w/2-6) + ' ' + (h*.38+7) + ' H' + (w/2+6) + '" stroke="#3d3450" stroke-width="2.2" stroke-linecap="round"/>'; },
+    function(w,h){ return '<path d="M' + (w/2-5) + ' ' + (h-2) + ' V' + (h*.42) + ' H3 V' + (h*.26) + ' H' + (w/2-5) + ' V3 H' + (w/2+5) + ' V' + (h*.26) + ' H' + (w-3) + ' V' + (h*.42) + ' H' + (w/2+5) + ' V' + (h-2) + ' Z" fill="#665a7d"/>'; },
+    function(w,h){ return '<path d="M3 ' + (h-2) + ' L5 10 Q6 3 ' + (w/2) + ' 3 Q' + (w-6) + ' 3 ' + (w-5) + ' 10 L' + (w-3) + ' ' + (h-2) + ' Z" fill="#4f4565"/><circle cx="' + (w/2) + '" cy="' + (h*.36) + '" r="4.2" fill="#2e2640"/><rect x="' + (w/2-1.4) + '" y="' + (h*.36+3) + '" width="2.8" height="8" fill="#2e2640"/>'; },
+    function(w,h){ return '<rect x="3" y="3" width="' + (w-6) + '" height="' + (h-5) + '" rx="3" fill="#5b5070"/><path d="M8 14 H' + (w-8) + ' M8 21 H' + (w-12) + '" stroke="#3d3450" stroke-width="2" stroke-linecap="round"/>'; }
+  ];
+  function stone(kind, w, h, tilt){
+    return '<svg class="stone" style="transform:rotate(' + tilt + 'deg)" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '">' + STONES[kind](w, h) + '</svg>';
+  }
+  var TREE = '<svg class="tree" viewBox="0 0 120 150" width="96" height="120"><g fill="none" stroke="#0d0615" stroke-linecap="round" stroke-linejoin="round"><path d="M60 150 C58 120 62 100 60 70 M60 100 C44 88 36 74 22 66 M60 84 C76 72 84 58 100 52 M60 70 C58 52 52 40 56 22 M36 76 C30 66 30 56 22 48 M84 64 C90 56 96 46 94 34 M56 30 C48 24 44 16 36 12" stroke-width="7"/><path d="M22 66 C16 66 10 62 6 56 M100 52 C108 52 112 46 116 40 M56 22 C58 14 64 10 70 6" stroke-width="3.5"/></g></svg>';
+
+  function sceneHTML(i){
+    var r = rng(40 + i * 17), h = "";
+    h += '<div class="ground"></div><div class="decor"><div class="fence"></div>';
+    var n = 5;
+    for (var k = 0; k < n; k++){
+      var x = 4 + ((k + r() * .7) / n) * 90;
+      var kind = (k + i) % 4, w = 30 + Math.round(r() * 12), ht = 46 + Math.round(r() * 26);
+      var tilt = Math.round((r() - .5) * 12);
+      h += '<div style="left:' + x.toFixed(1) + '%;bottom:' + (-4 + Math.round(r() * 5)) + 'px">' + stone(kind, w, ht, tilt) + '</div>';
+    }
+    h += '<div style="' + (i % 2 ? 'left:1%' : 'right:2%') + '">' + TREE + '</div>';
+    return h + '</div>';
+  }
+
+  (function(){
+    var holder = document.getElementById("bats");
+    for (var i = 0; i < 4; i++){
+      var b = document.createElement("span");
+      b.className = "bat"; b.textContent = "🦇";
+      b.style.top = (40 + i * 38) + "px";
+      b.style.animationDuration = (26 + i * 7) + "s";
+      b.style.animationDelay = (-i * 9) + "s";
+      holder.appendChild(b);
+    }
+  })();
+
+  function fitTitle(){
+    var h = document.getElementById("ttl"), t = document.getElementById("ttlText");
+    h.style.fontSize = "100px";
+    var w = t.getBoundingClientRect().width;
+    if (w > 0) h.style.fontSize = Math.min(260, 100 * h.clientWidth / w) + "px";
+  }
+  window.addEventListener("resize", fitTitle);
+  fitTitle();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitTitle);
+
+  /* ---------- build rows ---------- */
+  function buildRows(){
+    people.forEach(function(p, i){
+      var row = document.createElement("div");
+      row.className = "row";
+      row.style.setProperty("--c", p.color);
+      row.style.setProperty("--p", 0);
+      row.style.setProperty("--rank", i);
+      row.innerHTML =
+        '<div class="scene">' + sceneHTML(i) + '<div class="marks"></div></div>' +
+        '<div class="fog"></div>' +
+        '<div class="lane">' +
+          '<div class="bar"><div class="fill"></div></div>' +
+          '<div class="runner">' + walkerSVG(p, i) + '</div>' +
+        '</div>' +
+        '<div class="who"><span class="pname">' + p.name + '</span><span class="steps"><span class="n">0</span></span></div>' +
+        '<div class="pct"><span><b class="pv">0.0</b><em>%</em></span></div>' +
+        '<div class="gap none"><span class="gn">0</span><i class="gl2"></i></div>';
+      stack.appendChild(row);
+      rows[p.id] = {
+        el: row,
+        steps: row.querySelector(".steps .n"),
+        pct: row.querySelector(".pv"),
+        marks: row.querySelector(".marks"),
+        gap: row.querySelector(".gap"), gapN: row.querySelector(".gn"), gapL: row.querySelector(".gl2")
+      };
+    });
+  }
+
+  function tomb(v){
+    var t = String(v), fs = t.length > 2 ? 11.5 : 13.5;
+    return '<svg viewBox="0 0 40 34" aria-hidden="true">' +
+      '<path d="M5 33 V15 Q5 1 20 1 Q35 1 35 15 V33 Z" fill="#6d6285" stroke="#2a2138" stroke-width="1.2"/>' +
+      '<path d="M8 33 V15 Q8 4 18 3.5" fill="none" stroke="#8c80a6" stroke-width="1.4" stroke-linecap="round"/>' +
+      '<text x="20" y="22.5" text-anchor="middle" font-family="Fredoka,sans-serif" font-weight="700" font-size="' + fs + '" fill="#2a2138" stroke="#9a8fb3" stroke-width=".5" paint-order="stroke">' + t + '<tspan font-size="' + (fs * .72) + '" dy="-2.2">%</tspan></text>' +
+      '</svg>';
+  }
+  function pumpkin(v){
+    var t = String(v);
+    var fs = t.length > 2 ? 14 : 17;
+    return '<svg viewBox="0 0 40 34" aria-hidden="true">' +
+      '<path d="M20 7 C19 4 20 2 23 1" fill="none" stroke="#5b8a2e" stroke-width="2.6" stroke-linecap="round"/>' +
+      '<ellipse cx="11" cy="20" rx="9.5" ry="12" fill="#d9600c"/><ellipse cx="29" cy="20" rx="9.5" ry="12" fill="#d9600c"/>' +
+      '<ellipse cx="20" cy="20" rx="10.5" ry="12.6" fill="#ff8a1f"/>' +
+      '<path d="M20 8 C15 14 15 26 20 32 M20 8 C25 14 25 26 20 32 M12 11 C6 17 7 27 13 31 M28 11 C34 17 33 27 27 31" fill="none" stroke="#b44a05" stroke-width="1" opacity=".7"/>' +
+      '<text x="20" y="24" text-anchor="middle" font-family="Fredoka,sans-serif" font-weight="700" font-size="' + fs + '" fill="#ffe27a" stroke="#7a2600" stroke-width=".7" paint-order="stroke" letter-spacing=".2">' + t + '<tspan font-size="' + (fs * .72) + '" dy="-2.5">%</tspan></text>' +
+      '</svg>';
+  }
+  /* Each lane shows only the two pumpkin/tombstone markers nearest ahead of the walker.
+     25 and 75 and 125 are pumpkins; 50, 100 and 150 are tombstones. */
+  function updateMarks(r, pct){
+    var lo = Math.max(25, Math.floor(pct / 25) * 25), vals = [lo, lo + 25];
+    var key = vals.join(",") + "@" + axisMax;
+    if (r.marksKey === key) return;
+    r.marksKey = key;
+    var html = "";
+    vals.forEach(function(v){
+      if (v > axisMax) return;
+      var left = "calc(var(--pad) + (100% - 2 * var(--pad)) * " + (v / axisMax) + ")";
+      html += '<div class="mark' + (v === 100 ? " hundred" : "") + ((v / 25) % 2 ? " pk" : "") + '" style="left:' + left + '">' + ((v / 25) % 2 ? pumpkin(v) : tomb(v)) + '</div>';
+    });
+    r.marks.innerHTML = html;
+  }
+
+  /* ---------- frames ---------- */
+  function zeroSteps(){ var o = {}; people.forEach(function(p){ o[p.id] = 0; }); return o; }
+
+  function makeFrames(){
+    frames = [{ label: "Start", steps: zeroSteps() }];
+    (data.history || []).forEach(function(h){
+      var s = zeroSteps();
+      people.forEach(function(p){ s[p.id] = +(h.steps && h.steps[p.id]) || 0; });
+      frames.push({ label: fmtDate(h.date), date: h.date, steps: s });
+    });
+    var start = new Date(data.challenge.start + "T12:00:00");
+    frames.forEach(function(f){
+      if (f.date){
+        f.day = Math.round((new Date(f.date + "T12:00:00") - start) / 864e5) + 1;
+      }
+    });
+  }
+
+  function rng(seed){ return function(){ seed |= 0; seed = seed + 0x6D2B79F5 | 0; var t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+  function demoHistory(){
+    var r = rng(7), hist = [], tot = {};
+    people.forEach(function(p){ tot[p.id] = 0; });
+    var pace = { ross: 1.04, aj: 0.93, adam: 1.12, kev: 1.0 };
+    for (var d = 1; d <= 24; d++){
+      var s = {};
+      people.forEach(function(p){
+        var daily = p.baseline / 31 * (pace[p.id] || 1) * (0.55 + r() * 0.95);
+        tot[p.id] += daily; s[p.id] = Math.round(tot[p.id]);
+      });
+      var dd = new Date(2026, 9, d);
+      var iso = dd.getFullYear() + "-" + String(dd.getMonth()+1).padStart(2,"0") + "-" + String(dd.getDate()).padStart(2,"0");
+      hist.push({ date: iso, steps: s });
+    }
+    return hist;
+  }
+
+  /* ---------- render ---------- */
+  function render(i, instant){
+    idx = i;
+    var f = frames[i];
+    var list = people.map(function(p, k){
+      return { p: p, k: k, steps: f.steps[p.id], pct: pctOf(p, f.steps[p.id]) };
+    });
+    var maxPct = Math.max.apply(null, list.map(function(x){ return x.pct; }));
+    var wantMax = Math.max(110, Math.ceil((maxPct + 3) / 10) * 10);
+    if (wantMax !== axisMax){ axisMax = wantMax; }
+
+    var sorted = list.slice().sort(function(a, b){ return (b.pct - a.pct) || (a.k - b.k); });
+    sorted.forEach(function(x, rank){
+      var r = rows[x.p.id];
+      r.el.style.setProperty("--rank", rank);
+      r.el.style.setProperty("--p", Math.min(1, x.pct / axisMax));
+      updateMarks(r, x.pct);
+      var ahead = rank > 0 ? sorted[rank - 1] : null;
+      var need = ahead ? Math.max(0, Math.ceil(ahead.pct / 100 * x.p.baseline - x.steps)) : 0;
+      r.gap.classList.toggle("none", !ahead);
+      if (ahead){
+        r.gapL.textContent = "steps behind " + ahead.p.name;
+        if (instant){ r.gapN._v = need; r.gapN.textContent = fmt(need); } else tween(r.gapN, need, fmt);
+      }
+      r.el.classList.toggle("leader", rank === 0 && x.pct > 0);
+      if (instant){
+        r.steps._v = x.steps; r.steps.textContent = fmt(x.steps);
+        r.pct._v = x.pct; r.pct.textContent = x.pct.toFixed(1);
+      } else {
+        tween(r.steps, x.steps, fmt);
+        tween(r.pct, x.pct, function(v){ return v.toFixed(1); });
+      }
+    });
+
+    slider.value = i;
+    var last = frames.length - 1;
+    if (!f.date) whenEl.textContent = "Start of the month";
+    else whenEl.textContent = f.label + (i === last && !playTimerOn() ? " (latest)" : "");
+  }
+
+  function playTimerOn(){ return timer !== null; }
+
+  /* ---------- replay ---------- */
+  function stop(){
+    if (timer){ clearInterval(timer); timer = null; }
+    playBtn.textContent = "Replay the month";
+  }
+  function play(){
+    if (frames.length < 2) return;
+    if (idx >= frames.length - 1) render(0, true);
+    playBtn.textContent = "Pause";
+    timer = setInterval(function(){
+      if (idx >= frames.length - 1){ stop(); render(idx, true); return; }
+      render(idx + 1);
+      if (idx >= frames.length - 1){ stop(); whenEl.textContent = frames[idx].label + " (latest)"; }
+    }, DAY_MS);
+    setTimeout(function(){ if (timer && idx === 0) render(1); }, 350);
+  }
+
+  playBtn.addEventListener("click", function(){ timer ? stop() : play(); });
+  liveBtn.addEventListener("click", function(){ stop(); render(frames.length - 1); });
+  slider.addEventListener("input", function(){ stop(); render(+slider.value); });
+
+  /* ---------- boot ---------- */
+  function boot(d){
+    data = d; people = d.people;
+    if (DEMO || d.demo){
+      data.history = demoHistory();
+      document.getElementById("demoBanner").style.display = "block";
+    }
+    makeFrames(); buildRows();
+    var tilts = [-2, 1.5, -1, 2];
+    document.getElementById("yardStones").innerHTML = people.slice().sort(function(a, b){ return b.baseline - a.baseline; }).map(function(p, i){
+      return '<div class="rip" style="--t:' + tilts[i % 4] + 'deg"><b>' + p.name + '</b><span>' + fmt(p.baseline) + '</span></div>';
+    }).join("");
+
+    slider.max = frames.length - 1;
+    var multi = frames.length > 1;
+    playBtn.disabled = !multi; slider.disabled = !multi; liveBtn.disabled = !multi;
+
+    var s = fmtDate(data.challenge.start);
+
+    var upd = data.updated ? new Date(data.updated) : null;
+    noteEl.innerHTML = multi
+      ? "Updated " + upd.toLocaleString("en-US",{month:"short", day:"numeric", hour:"numeric", minute:"2-digit"}) + ". Drag the slider or press replay to watch the month unfold."
+      : "The challenge starts " + s + ". Standings and the replay appear here after the first update.";
+
+    render(frames.length - 1, true);
+  }
+
+  fetch("data.json?v=" + Date.now(), { cache: "no-store" })
+    .then(function(r){ if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+    .then(boot)
+    .catch(function(err){
+      document.getElementById("stack").innerHTML =
+        '<div class="err">Could not load data.json (' + err.message + '). Open this page from a web server, such as GitHub Pages or <code>python3 -m http.server</code>, not straight from the file.</div>';
+    });
+})();
+</script>
+</body>
+</html>
