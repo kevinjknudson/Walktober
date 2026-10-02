@@ -101,7 +101,7 @@ h1 span{display:inline-block}
   text-align:center; font-size:clamp(15px,2.7vw,23px); font-weight:700; line-height:1.1; color:var(--c); opacity:.85;
   font-variant-numeric:tabular-nums; transition:opacity .4s;
 }
-.gap i{white-space:nowrap; display:block; font-style:normal; font-size:.54em; font-weight:500; letter-spacing:0; opacity:.9; margin-top:.1em}
+.gap i{white-space:nowrap; display:block; font-style:normal; font-size:max(.54em,11px); font-weight:500; letter-spacing:0; opacity:.9; margin-top:.1em}
 .gap.none{opacity:0}
 .pct{
   position:absolute; right:12px; top:var(--dt); height:var(--ih); z-index:2;
@@ -184,7 +184,7 @@ h1 span{display:inline-block}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3.5px)}}
 
 .controls{
-  margin-top:26px; display:flex; flex-wrap:wrap; align-items:center; gap:14px 18px;
+  margin-top:10px; display:flex; flex-wrap:wrap; align-items:center; gap:14px 18px;
   padding:14px 16px; border-radius:16px; background:rgba(0,0,0,.28); border:1px solid rgba(255,241,220,.1);
 }
 button{
@@ -200,6 +200,8 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--gold); outline-
 .scrub{flex:1; min-width:180px; display:flex; align-items:center; gap:12px}
 input[type=range]{flex:1; accent-color:var(--pumpkin); height:28px}
 .when{min-width:128px; font-weight:500; color:var(--gold); font-size:17px}
+.refresh{margin:12px 6px 0; text-align:right; color:var(--pumpkin); font-size:15px; font-weight:600; font-variant-numeric:tabular-nums}
+.refresh:empty{display:none}
 .note{margin:18px 2px 0; color:var(--dim); font-size:14px; line-height:1.5}
 .note b{color:var(--cream); font-weight:500}
 .banner{display:none; margin:0 0 14px; padding:8px 14px; border-radius:10px; background:rgba(255,184,77,.16); color:var(--gold); font-size:14px}
@@ -242,6 +244,8 @@ input[type=range]{flex:1; accent-color:var(--pumpkin); height:28px}
   <section class="board" aria-label="Walktober standings">
     <div class="stack" id="stack"></div>
   </section>
+
+  <div class="refresh" id="refresh" aria-live="polite"></div>
 
   <section class="controls" aria-label="Replay controls">
     <button id="play" type="button">Replay the month</button>
@@ -671,9 +675,13 @@ input[type=range]{flex:1; accent-color:var(--pumpkin); height:28px}
 
     var upd = data.updated ? new Date(data.updated) : null;
     noteEl.innerHTML = multi
-      ? "Updated " + upd.toLocaleString("en-US",{month:"short", day:"numeric", hour:"numeric", minute:"2-digit"}) + ". Drag the slider or press replay to watch the month unfold."
+      ? "Drag the slider or press replay to watch the month unfold."
       : "The challenge starts " + s + ". Standings and the replay appear here after the first update.";
 
+    var rf = document.getElementById("refresh");
+    if (upd && !isNaN(upd)){
+      rf.textContent = "Last refresh: " + upd.toLocaleString("en-US", {timeZone:"America/New_York", month:"short", day:"numeric", hour:"numeric", minute:"2-digit"}) + " ET";
+    }
     render(frames.length - 1, true);
   }
 
