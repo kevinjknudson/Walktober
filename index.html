@@ -602,10 +602,16 @@ input[type=range]{flex:1; accent-color:var(--pumpkin); height:28px}
     var wantMax = Math.max(110, Math.ceil((maxPct + 3) / 10) * 10);
     if (wantMax !== axisMax){ axisMax = wantMax; }
 
-    var sorted = list.slice().sort(function(a, b){ return (b.pct - a.pct) || (a.k - b.k); });
+    var byPct = function(a, b){ return (b.pct - a.pct) || (a.k - b.k); };
+    var sorted = list.slice().sort(byPct);
+    /* Lanes stay in the order of the latest standings, so replaying the month only moves walkers sideways. */
+    var latest = frames[frames.length - 1];
+    var lane = {};
+    people.map(function(p, k){ return { id: p.id, k: k, pct: pctOf(p, latest.steps[p.id]) }; })
+      .sort(byPct).forEach(function(x, i){ lane[x.id] = i; });
     sorted.forEach(function(x, rank){
       var r = rows[x.p.id];
-      r.el.style.setProperty("--rank", rank);
+      r.el.style.setProperty("--rank", lane[x.p.id]);
       r.el.style.setProperty("--p", Math.min(1, x.pct / axisMax));
       updateMarks(r, x.pct);
       var ahead = rank > 0 ? sorted[rank - 1] : null;
