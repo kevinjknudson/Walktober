@@ -13,7 +13,7 @@ replay button plays the month back day by day.
 
 ## Characters
 
-Each person in `data.json` has a `character`: `skeleton`, `mummy`, `witch` or `cat`. Swap them by editing that one word. Right now: Kev is the skeleton, Ross the mummy, AJ the witch and Adam the black cat. Each walks a graveyard lane, with pumpkin and tombstone markers at the next two % milestones. Last October's totals sit on the tombstones at the bottom.
+Each person in `data.json` has a `character`: `skeleton`, `mummy`, `witch`, `cat` or `clown`. Swap them by editing that one word. Right now: Kev is the circus clown, Ross the mummy, AJ the witch and Adam the black cat. Each walks a graveyard lane, with pumpkin and tombstone markers at the next two % milestones. Last October's totals sit on the tombstones at the bottom.
 
 ## Updating by hand
 

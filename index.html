@@ -414,6 +414,31 @@ input[type=range]{flex:1; accent-color:var(--pumpkin); height:28px}
                shape("M75 8 L72 -14 L56 3 Z", CAT) + shape("M72 4 L70 -7 L62 2 Z", "#e58aa0", "none") +
                line("M30 40 L8 36 M30 44 L6 46 M31 48 L11 56 M70 40 L92 36 M70 44 L94 46 M69 48 L89 56", "#f4efe6", 1.2);
       }
+    },
+      clown: {
+      label: "circus clown",
+      arm: function(){
+        return seg(50, 66, 50, 92, 11, "#ffd23f") + circ(50, 73, 2.1, "#e63946", "none") + circ(50, 84, 2.1, "#2a6fdb", "none") +
+               ell(50, 93, 7.5, 3, "#fff") + circ(50, 99, 5.6, "#fff");
+      },
+      leg: function(){
+        return seg(50, 100, 50, 146, 15, "#2a6fdb") + circ(46, 112, 2.6, "#fff", "none") + circ(54, 126, 2.6, "#fff", "none") + circ(46, 138, 2.6, "#fff", "none") +
+               shape("M37 146 H64 Q84 145 91 151 Q91 157 77 157 H37 Q33 152 37 146 Z", "#e63946") +
+               ell(72, 150.5, 8, 2.2, "rgba(255,255,255,.35)", "none") + circ(43, 149, 2.6, "#ffd23f", "none");
+      },
+      behind: none, behindHead: none, mid: none,
+      torso: function(){
+        var s = shape("M33 54 H67 C75 70 77 90 74 106 H26 C23 90 25 70 33 54 Z", "#e63946");
+        [[36,66],[62,64],[32,84],[67,86],[40,98],[60,99],[50,106]].forEach(function(d){ s += circ(d[0], d[1], 2.8, "#fff", "none"); });
+        s += circ(50, 76, 3.3, "#ffd23f") + circ(50, 90, 3.3, "#2a6fdb");
+        ["#fff","#ffd23f","#4cc9f0","#ffd23f","#fff"].forEach(function(c, i){ s += circ(34 + i * 8, 62 - (i % 2), 5.2, c); });
+        return s;
+      },
+      front: function(){
+        return circ(50.5, 35, 5.4, "#e63946", "#7a0f1d") + circ(48.8, 33, 1.5, "rgba(255,255,255,.75)", "none") +
+               shape("M43 21 L46 24.5 L43 28 L40 24.5 Z", "#2a6fdb", "none") + shape("M58 21 L61 24.5 L58 28 L55 24.5 Z", "#2a6fdb", "none") +
+               '<g transform="translate(-2 13) rotate(16 70 -6)">' + rect(61, -17, 17, 11, 2, "#6a2c91") + rect(57, -7, 25, 4, 2, "#6a2c91") + rect(61, -10, 17, 3, 0, "#ffd23f", "none") + circ(80, -13, 3.4, "#ff5d8f") + '</g>';
+      }
     }
   };
 
